@@ -3,6 +3,8 @@ init -1 python:
     import random
     import re
     
+    username = "Eliza"
+    
     # list of moods for identification purposes and calculating how a character is feeling
     moods = {
                 'positive': ["happy", "joyful", "accomplished", "hopeful", "peaceful", "energetic", "rested"],
@@ -10,10 +12,32 @@ init -1 python:
             }
     
     def ClassifyQuery(qstr):
-        # do some pattern matching stuff
-        querytype = "unknown"
+        querytype = None
         
-        qvars = {}
+        match = None
+        
+        # do some pattern matching stuff
+        if re.match("Hello", qstr) is not None or re.match("Hi", qstr) is not None:
+            querytype = "hello"
+        elif re.search(qstr, "My name is (?P<name>\w+)") is not None:
+            match = re.search("My name is (?P<name>\w+)", qstr)
+            querytype = "self-intro"
+        elif re.search(qstr, "My name's (?P<name>\w+)") is not None:
+            match = re.search("My name's (?P<name>\w+)", qstr)
+            querytype = "introduction"
+        elif re.match("How are you (?P<feeling>\w+)", qstr) is not None:
+            querytype = "mood-inquiry"
+        elif re.search("What do you think of (?P<subj>\w+)", qstr) is not None or re.search("What's your opinion of(?P<subj>\w+)", qstr):
+            querytype = "opinion-query"
+        elif re.search(qstr, "goodbye") is not None or re.search(qstr, "bye") is not None:
+            querytype = "goodbye"
+        else:
+            querytype = "unknown"
+            
+        if match is not None:
+            qvars = match.groupdict()
+        else:
+            qvars = {}
         
         return (querytype, qvars)
 
@@ -26,13 +50,13 @@ init -1 python:
             return self.infostrings[random.random(0, len(self.infostrings))]
 
     class Preference(object):
-        def __init__(self, name, vals):
+        def __init__(self, name, lev):
             self.name = name
-            self.level = 0
-            self.vals = vals # a hash of feelings about the preference
+            self.level = lev
+            #self.vals = vals # a hash of feelings about the preference
             
-            for val in self.vals:
-                self.level += val
+            #for val in self.vals:
+            #    self.level += val
         
     class Relationship(object):
         def __init__(self, attrs, reltype, label, info):
@@ -100,7 +124,7 @@ init -1 python:
             self.behaviors = v('behaviors')    # list of strings
             
             # keep track of who you're talking to
-            self.speakingto = None
+            self.speakingto = "<noname>"
             
             # thresholds for how much "like" or "dislike" it'll take for the character to decide whether they
             # want to be your bff or to hate you.
@@ -310,7 +334,7 @@ init -1 python:
             self.relationships[name].info.append(infostr)
             
         def RandomRelInfo(self, name):
-            return self.relationships[name].info[random.randint(0, len(self.relationships[name].info)-1)]
+            return random.choice(self.relationships[name].info)
             
         def InfoLookup(self, item, querytype):
             if querytype == "who" or querytype == "what":
@@ -320,7 +344,7 @@ init -1 python:
                 if querytype in knowledgebase[item]:
                     return knowledgebase[item][querytype]
                 else:
-                    return knowledgebase[item][adjectives][random.randint(0, len(knowledgebase[item][adjectives])-1)]
+                    return random.choice(knowledgebase[item][adjectives])
             return -1
             
         def HasBehavior(self, behave):
@@ -329,24 +353,41 @@ init -1 python:
             return False
             
         def GetRandomResponse(self, situation):
-            return random.choice(self.stocktext[situation])
+            if situation in self.stocktext:
+                return random.choice(self.stocktext[situation])
             
         def Respond(self, qstring):
             # who/what query
             
             (querytype, qvars) = ClassifyQuery(qstring)
             
+            if "subject" in qvars:
+                if qvars['subject'] is not ("he" or "she" or "it" or "they"):
+                    self.lastsubject = qvars['subject']
+            
             expression = "happy"
             
             cont = True
             
-            if querytype == "info-query":
+            self.speakingto = username
+            
+            if querytype == "hello":
+                respstr = self.GetRandomResponse("hello")
+                if self.speakingto in self.relationships:
+                    namequery = ""
+                else:
+                    namequery = random.choice(self.stocktext['name-query'])
+                    re.subn("?NAMEQUERY", namequery, respstr)
+            elif querytype == "introduction":
+                respstr = self.GetRandomResponse("introduction")
+                re.subn("?NAME", self.speakingto, respstr)
+            elif querytype == "info-query":
                 if HasRelationshipTo(qvars['subject']):
                     if self.relationships[qvars['subject']].reltype == "personal":
                         respstr = self.GetRandomResponse("personal-who-query")
                         infostr = self.RandomRelInfo(qvars['subject'])
-                        re.sub("?SUBJ", qvars['subject'], respstr)
-                        re.sub("?INFO", infostr, respstr)
+                        re.subn("?SUBJ", qvars['subject'], respstr)
+                        re.subn("?INFO", infostr, respstr)
                 else:
                     if qvars['subject'] in knowledgebase:
                         if "who" in knowledgebase[qvars['subject']]:
@@ -356,25 +397,28 @@ init -1 python:
                 # if false, check in general knowledge base
                 
                 # else: generate "unknown" response
-                respstr = self.GetRandomResponse("unknown")
+                respstr = self.GetRandomResponse("dont-know")
             # location query
-            elif querytype == "loc-query":
-                # have key "subject"
-                
-                # check knowledgebase first
-                
-                # if has behavior "talkative" look for add'l information in relationships
-                respstr = self.GetRandomResponse("unknown")
+            elif querytype == "where-query":
+                if qvars['subject'] in knowledgebase:
+                    if "where" in knowledgebase[qvars['subject']]:
+                        qvars['where'] = knowledgebase[qvars['subject']]['where']
+                        respstr = self.GetRandomResponse("where-query")
+                        re.subn("?SUBJ", qvars['subject'], respstr)
+                        re.subn("?WHERE", qvars['where'], respstr)
+                else:
+                    respstr = "I don't know where " + qvars['subject'] + "is."
                 
             elif querytype == "opinion-query":
-                # have keys "value" (positive/negative), "subject"
-                
-                # check in prefs
-                
-                # generate like/dislike/neutral response based on score
-                
-                # if like/dislike, add additional information based on its vals
-                respstr = self.GetRandomResponse("unknown")
+                if qvars['subj'] in self.prefs:
+                    if self.prefs[qvars['subj']] > 0:
+                        respstr = self.GetRandomResponse("pos-opinion-query")
+                    elif self.prefs[qvars['subj']] < 0:
+                        respstr = self.GetRandomResponse("neg-opinion-query")
+                    else:
+                        respstr = self.GetRandomResponse("neutral-opinion")
+                        
+                re.subn("?SUBJ", qvars['subject'], respstr)
                 
             elif querytype == "goodbye":
                 goodbye = True

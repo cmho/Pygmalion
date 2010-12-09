@@ -49,9 +49,11 @@ init:
     $ gal_prefs = {'books': 2, 'writing': 3, 'math': 1, 'computer science': 5, 'fish': -5, 'Professor Smith': -2, 'finals': -4}
     $ gal_text = {
                      "unknown": ["I'm sorry, I'm not sure I understood you.", "Sorry, what was that?"],
+                     "hello": ["Oh, hi! ?NAMEQUERY", "Hello! ?NAMEQUERY"],
+                     "introduction": ["It\'s nice to meet you\, ?NAME\.  I\'m Galatea\."],
                      "personal-who-query": ["Oh, ?SUBJ\?  ?PNOUN is ?WHAT\.", "?SUBJ\? I think ?PNOUN ?OPINION\."],
                      "where-query": ["?SUBJ is ?WHERE\.  Does that help\?"],
-                     "pos-opinion-query": ["Oh, I ?FEELING ?SUBJ\.", "?SUBJ\?  ?ADJ\."],
+                     "pos-opinion-query": ["Oh, I like ?SUBJ\.", "?SUBJ\?  Oh\, it\'s great\."],
                      "pos-opinion-respond": ["Me too\!", "I like ?SUBJ too\."],
                      "neg-opinion-query": ["Eh\, it\'s okay\.", "I\'m not that keen on ?SUBJ\."],
                      "neg-opinion-respond": ["?SUBJ\.\.\. Eh.", "I never really got into ?SUBJ\."],
@@ -67,11 +69,16 @@ init:
                      "neutral-opinion": ["I don\'t really know about ?SUBJ\.", "I can\'t really say I feel strongly either way about ?SUBJ\, I guess\."]
                  }
                  
+    $ gal_rels = {'Professor Smith': Relationship({'hated': 1, 'irritating': 3, 'disliked': 4}, "personal", "professor for algorithms", ["worked on the latest Windows OS", "does research for NASA or something"])}
+                 
     $ smith_attrs = {'strict': 2, 'opinionated': 3, 'intelligent': 5, 'lonely': 1, 'sciencey': 5}
     $ smith_prefs = {'students handing in late homework': -10, 'grading homework': -20, 'c': 10, 'vegetables': 3, 'students': -5, 'computer science': 10, 'algorithms': 5}
     
     $ smith_text = {
                      "unknown": ["Eh\, speak up\.", "What\'d you say\?"],
+                     "hello": ["Hello. ?NAMEQUERY"],
+                     "self-intro": ["I'm Carlton Smith."],
+                     "name-query": ["You are?"],
                      "personal-who-query": ["?SUBJ\?  ?PNOUN is ?WHAT\.", "?PNOUN ?OPINION\."],
                      "where-query": ["?WHERE\."],
                      "pos-opinion-query": ["I ?FEELING ?SUBJ\.", "?SUBJ\ is ?ADJ\."],
@@ -79,19 +86,19 @@ init:
                      "neg-opinion-query": ["Eh\, it\'s okay\.", "I\'m not that keen on ?SUBJ\."],
                      "neg-opinion-respond": ["?SUBJ\.\.\. Eh.", "I never really got into ?SUBJ\."],
                      "what-doing": ["Oh, I'm ?ACTION\.", "?ACTION\."],
-                     "pos-feeling-query": ["Oh, I\'m doing great\, thanks\!", "Doing well\. You\?"],
-                     "neg-feeling-query": ["Ugh\. I don\'t want to talk about it\.", "Eh\.  I'm really ?ADJ\."],
-                     "classes-query": ["I\'m taking databases\, algorithms\, and public speaking\."],
-                     "class-specific": ["It\'s a course on ?DESC\.  It\'s ?ADJ\.", "It\'s about ?DESC\.  It\'s ?ADJ\."],
+                     "pos-feeling-query": ["Well enough\."],
+                     "neg-feeling-query": ["Hmph\."],
+                     "classes-query": ["I teach algorithms\ this term."],
+                     "class-specific": ["It\'s a course on ?DESC\.", "It\'s about ?DESC\."],
                      "class-where": ["It\'s in ?LOC\."],
-                     "class-teacher": ["?NAME is the professor\.", "It\'s taught by ?NAME\."],
+                     "class-teacher": ["?NAME is teaching it\.", "It\'s taught by ?NAME\."],
                      "hobbies-query": ["I like to ?ITEM\.", "I ?ITEM\."],
-                     "goals-query": ["I want to ?GOAL someday\.", "I\'m going to ?GOAL\."],
-                     "neutral-opinion": ["I don\'t really know about ?SUBJ\.", "I can\'t really say I feel strongly either way about ?SUBJ\, I guess\."]
+                     "goals-query": ["Well\, I\'m writing this paper\.\.\."],
+                     "neutral-opinion": ["Can\'t see why people get worked up about ?SUBJ\."]
                  }
     
-    $ galatea = AICharacter('Galatea', attrs=gal_attrs, prefs=gal_prefs, text=gal_text)
-    $ profsmith = AICharacter('Professor Smith', attrs=smith_attrs, prefs=smith_prefs)
+    $ galatea = AICharacter('Galatea', attrs=gal_attrs, prefs=gal_prefs, text=gal_text, rels=gal_rels)
+    $ profsmith = AICharacter('Professor Smith', attrs=smith_attrs, prefs=smith_prefs, text=smith_text)
 
 
 # The game starts here.
@@ -134,6 +141,8 @@ label start:
     "A tip: for purposes of this demo, you...{w=3} {i}might{/i} want to ask about simple things, or school-related things.  Just a suggestion."
     
 label chooseconvo:
+
+    $talkingto = None
     
     "Who would you like to talk to?"
     
@@ -145,7 +154,7 @@ label chooseconvo:
             $ talkingto = profsmith
         "Exit":
             return
-            
+           
     scene bg convo with fade
         
 label convo:
