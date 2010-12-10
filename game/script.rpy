@@ -47,26 +47,29 @@ init:
     
     $ gal_attrs = {'shy': 1, 'intelligent': 3, 'stressed': 8, 'frustrated': 2, 'tired': 3}
     $ gal_prefs = {'books': 2, 'writing': 3, 'math': 1, 'computer science': 5, 'fish': -5, 'Professor Smith': -2, 'finals': -4}
-    $ gal_text = {
-                     "unknown": ["I'm sorry, I'm not sure I understood you.", "Sorry, what was that?"],
-                     "hello": ["Oh, hi! ?NAMEQUERY", "Hello! ?NAMEQUERY"],
-                     "introduction": ["It\'s nice to meet you\, ?NAME\.  I\'m Galatea\."],
-                     "personal-who-query": ["Oh, ?SUBJ\?  ?PNOUN is ?WHAT\.", "?SUBJ\? I think ?PNOUN ?OPINION\."],
-                     "where-query": ["?SUBJ is ?WHERE\.  Does that help\?"],
-                     "pos-opinion-query": ["Oh, I like ?SUBJ\.", "?SUBJ\?  Oh\, it\'s great\."],
-                     "pos-opinion-respond": ["Me too\!", "I like ?SUBJ too\."],
-                     "neg-opinion-query": ["Eh\, it\'s okay\.", "I\'m not that keen on ?SUBJ\."],
-                     "neg-opinion-respond": ["?SUBJ\.\.\. Eh.", "I never really got into ?SUBJ\."],
-                     "what-doing": ["Oh, I'm ?ACTION\.", "?ACTION\."],
-                     "pos-feeling-query": ["Oh, I\'m doing great\, thanks\!", "Doing well\. You\?"],
-                     "neg-feeling-query": ["Ugh\. I don\'t want to talk about it\.", "Eh\.  I'm really ?ADJ\."],
-                     "classes-query": ["I\'m taking databases\, algorithms\, and public speaking\."],
-                     "class-specific": ["It\'s a course on ?DESC\.  It\'s ?ADJ\.", "It\'s about ?DESC\.  It\'s ?ADJ\."],
-                     "class-where": ["It\'s in ?LOC\."],
-                     "class-teacher": ["?NAME is the professor\.", "It\'s taught by ?NAME\."],
-                     "hobbies-query": ["I like to ?ITEM\.", "I ?ITEM\."],
-                     "goals-query": ["I want to ?GOAL someday\.", "I\'m going to ?GOAL\."],
-                     "neutral-opinion": ["I don\'t really know about ?SUBJ\.", "I can\'t really say I feel strongly either way about ?SUBJ\, I guess\."]
+    $ gal_text = {"unknown": ["I'm sorry, I'm not sure I understood you.", "Sorry, what was that?"],
+                  "hello": ["Oh, hi! ?NAMEQUERY", "Hello! ?NAMEQUERY"],
+                  "name-query": ["What's your name?"],
+                  "introduction": ["It's nice to meet you, ?NAME.  I'm Galatea."],
+                  "personal-who-query": ["Oh, ?SUBJ?  ?PNOUN is ?WHAT.", "?SUBJ? I think ?PNOUN ?OPINION."],
+                  "where-query": ["?SUBJ is ?WHERE.  Does that help?"],
+                  "pos-opinion-query": ["Oh, I like ?SUBJ.", "?SUBJ?  Oh, it's great."],
+                  "pos-opinion-respond": ["Me too!", "I like ?SUBJ too."],
+                  "neg-opinion-query": ["Eh, it's okay.", "I'm not that keen on ?SUBJ."],
+                  "neg-opinion-respond": ["?SUBJ... Eh.", "I never really got into ?SUBJ."],
+                  "what-doing": ["Oh, I'm ?ACTION.", "?ACTION."],
+                  "pos-feeling-query": ["Oh, I'm doing great, thanks!", "Doing well. You?"],
+                  "neg-feeling-query": ["Ugh. I don't want to talk about it.", "Eh.  I'm really ?ADJ right now."],
+                  "classes-query": ["I'm taking databases, algorithms, and public speaking."],
+                  "class-specific": ["It's a course on ?DESC.  It's ?ADJ.", "It's about ?DESC.  It's ?ADJ."],
+                  "class-where": ["It's in ?LOC."],
+                  "class-teacher": ["?NAME is the professor.", "It's taught by ?NAME."],
+                  "hobbies-query": ["I like to ?ITEM.", "I ?ITEM."],
+                  "goals-query": ["I want to ?GOAL someday.", "I'm going to ?GOAL."],
+                  "neutral-opinion": ["I don't really know about ?SUBJ.", "I can't really say I feel strongly either way about ?SUBJ, I guess."],
+                  "dont-know": ["I'm sorry, I don't know about ?SUBJ."],
+                  "affirm-pos-opinion": ["You too? Cool.", "Hey, someone else who likes ?SUBJ!"],
+                  "affirm-neg-opinion": ["God, I know.  Ugh.", "Hey, so I'm not the only one.  Haha."]
                  }
                  
     $ gal_rels = {'Professor Smith': Relationship({'hated': 1, 'irritating': 3, 'disliked': 4}, "personal", "professor for algorithms", ["worked on the latest Windows OS", "does research for NASA or something"])}
@@ -75,29 +78,29 @@ init:
     $ smith_prefs = {'students handing in late homework': -10, 'grading homework': -20, 'c': 10, 'vegetables': 3, 'students': -5, 'computer science': 10, 'algorithms': 5}
     
     $ smith_text = {
-                     "unknown": ["Eh\, speak up\.", "What\'d you say\?"],
+                     "unknown": ["Eh, speak up.", "What'd you say?"],
                      "hello": ["Hello. ?NAMEQUERY"],
                      "self-intro": ["I'm Carlton Smith."],
                      "name-query": ["You are?"],
-                     "personal-who-query": ["?SUBJ\?  ?PNOUN is ?WHAT\.", "?PNOUN ?OPINION\."],
-                     "where-query": ["?WHERE\."],
-                     "pos-opinion-query": ["I ?FEELING ?SUBJ\.", "?SUBJ\ is ?ADJ\."],
-                     "pos-opinion-respond": ["Me too\!", "I like ?SUBJ too\."],
-                     "neg-opinion-query": ["Eh\, it\'s okay\.", "I\'m not that keen on ?SUBJ\."],
-                     "neg-opinion-respond": ["?SUBJ\.\.\. Eh.", "I never really got into ?SUBJ\."],
-                     "what-doing": ["Oh, I'm ?ACTION\.", "?ACTION\."],
-                     "pos-feeling-query": ["Well enough\."],
-                     "neg-feeling-query": ["Hmph\."],
-                     "classes-query": ["I teach algorithms\ this term."],
-                     "class-specific": ["It\'s a course on ?DESC\.", "It\'s about ?DESC\."],
-                     "class-where": ["It\'s in ?LOC\."],
-                     "class-teacher": ["?NAME is teaching it\.", "It\'s taught by ?NAME\."],
-                     "hobbies-query": ["I like to ?ITEM\.", "I ?ITEM\."],
-                     "goals-query": ["Well\, I\'m writing this paper\.\.\."],
-                     "neutral-opinion": ["Can\'t see why people get worked up about ?SUBJ\."]
+                     "personal-who-query": ["?SUBJ?  ?PNOUN is ?WHAT.", "?PNOUN ?OPINION."],
+                     "where-query": ["?WHERE."],
+                     "pos-opinion-query": ["I ?FEELING ?SUBJ.", "?SUBJ is ?ADJ."],
+                     "pos-opinion-respond": ["Me too!", "I like ?SUBJ too."],
+                     "neg-opinion-query": ["Eh, it's okay.", "I'm not that keen on ?SUBJ."],
+                     "neg-opinion-respond": ["?SUBJ... Eh.", "I never really got into ?SUBJ."],
+                     "what-doing": ["Oh, I'm ?ACTION.", "?ACTION."],
+                     "pos-feeling-query": ["Well enough."],
+                     "neg-feeling-query": ["Hmph."],
+                     "classes-query": ["I teach algorithms this term."],
+                     "class-specific": ["It's a course on ?DESC.", "It's about ?DESC."],
+                     "class-where": ["It's in ?LOC."],
+                     "class-teacher": ["?NAME is teaching it.", "It's taught by ?NAME."],
+                     "hobbies-query": ["I like to ?ITEM.", "I ?ITEM."],
+                     "goals-query": ["Well, I'm writing this paper..."],
+                     "neutral-opinion": ["Can't see why people get worked up about ?SUBJ."]
                  }
     
-    $ galatea = AICharacter('Galatea', attrs=gal_attrs, prefs=gal_prefs, text=gal_text, rels=gal_rels)
+    $ galatea = AICharacter('Galatea', attrs=gal_attrs, prefs=gal_prefs, text=gal_text, rels=gal_rels, action="studying", goal="work for Microsoft")
     $ profsmith = AICharacter('Professor Smith', attrs=smith_attrs, prefs=smith_prefs, text=smith_text)
 
 
@@ -152,6 +155,7 @@ label chooseconvo:
             $ talkingto = galatea
         "Professor Smith":
             $ talkingto = profsmith
+            jump notdonetesting
         "Exit":
             return
            
@@ -184,5 +188,12 @@ label convo:
         jump convo
     
     # To exit to menu
+    jump chooseconvo
+    
+label notdonetesting:
+    "I'm not done testing this."
+    
+    "You should probably go back. [Try picking Galatea.]"
+    
     jump chooseconvo
     
